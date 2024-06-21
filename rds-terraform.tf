@@ -1,8 +1,7 @@
 # configured aws provider with proper credentials
 provider "aws" {
   region = "us-east-2"
- access_key = "AKIA2UC266HG5QGS44S3"
- secret_key = "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"
+
 }
 
 # create default vpc if one does not exist
@@ -26,8 +25,8 @@ availability_zone = data.aws_availability_zones.available_zones.names[1]  # Seco
 }
 
 # create security group for the web server
-resource "aws_security_group" "webserver_security_group" {
-  name        = "webserver security group"
+resource "aws_security_group" "samundra" {
+  name        = "samundra"
   description = "enable http access on port 80"
   vpc_id      = aws_default_vpc.default_vpc.id
 
@@ -52,8 +51,8 @@ resource "aws_security_group" "webserver_security_group" {
 }
 
 # create security group for the database
-resource "aws_security_group" "database_security_group" {
-  name        = "database security group"
+resource "aws_security_group" "rdstest" {
+  name        = "rdstest"
   description = "enable mysql/aurora access on port 3306"
   vpc_id      = aws_default_vpc.default_vpc.id
 
@@ -62,7 +61,7 @@ resource "aws_security_group" "database_security_group" {
     from_port        = 3306
     to_port          = 3306
     protocol         = "tcp"
-    security_groups  = [aws_security_group.webserver_security_group.id]
+    security_groups  = [aws_security_group.samundra.id]
   }
 
   egress {
@@ -78,8 +77,8 @@ resource "aws_security_group" "database_security_group" {
 }
 
 # create the subnet group for the rds instance
-resource "aws_db_subnet_group" "database_subnet_group" {
-  name        = "database-subnet-group"
+resource "aws_db_subnet_group" "database1" {
+  name        = "database1"
   subnet_ids  = [aws_default_subnet.subnet_az.id, aws_default_subnet.subnet_az2.id]  # Corrected subnet resource names
 
   description = "Subnet group for RDS"
@@ -100,9 +99,10 @@ resource "aws_db_instance" "db_instance" {
   password              = "Samundra123"
   instance_class        = "db.t3.micro"
   allocated_storage     = 20
-  db_subnet_group_name  = aws_db_subnet_group.database_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.database_security_group.id]
+  db_subnet_group_name  = aws_db_subnet_group.database1.name
+  vpc_security_group_ids = [aws_security_group.rdstest.id]
   availability_zone     = data.aws_availability_zones.available_zones.names[0]
+  publicly_accessible = true
   db_name               = "samundradb"
   skip_final_snapshot   = true
 }
