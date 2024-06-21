@@ -1,7 +1,5 @@
 provider "aws" {
   region     = "us-east-2"
-  access_key = "AKIA2UC266HG5QGS44S3"
-  secret_key = "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"
 }
 
 # Security group to allow HTTP and SSH traffic
@@ -21,6 +19,14 @@ resource "aws_security_group" "security" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+   ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+
+   }
 
   egress {
     from_port   = 0
